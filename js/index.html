@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Weather World</title>
+
+<style>
+:root {
+    --light-bg: #fff;
+    --light-text: #1a1a1a;
+    --dark-bg: #111;
+    --dark-text: #f5f5f5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: var(--light-bg);
+    color: var(--light-text);
+    transition: background-color 1.2s ease,color 1.2s ease;
+}
+
+body.light {
+    background: var(--light-bg);
+    color: var(--light-text);
+}
+
+body.dark {
+    background: var(--dark-bg);
+    color: var(--dark-text);
+}
+
+button {
+    font: inherit;
+}
+
+img {
+    max-width: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.m1,.m2,.m3 {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 31vh;
+    pointer-events: none;
+    transition: background-color 1.2s ease;
+}
+
+.m1 {
+    background: #008000;
+    clip-path: polygon(0 100%,13% 0,50% 100%);
+    z-index: 2;
+}
+
+.m2 {
+    background: rgb(33,221,74);
+    clip-path: polygon(15% 100%,55% 0,80% 100%);
+    z-index: 1;
+}
+
+.m3 {
+    background: rgb(16,107,35);
+    clip-path: polygon(60% 100%,85% 0,120% 100%);
+    z-index: 1;
+}
+
+.ground {
+    position: fixed;
+    left: 50%;
+    bottom: -9vh;
+    width: 110vw;
+    height: 18vh;
+    min-height: 100px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: rgb(204,188,107);
+    opacity: .95;
+    z-index: 3;
+    transition: background-color 1.2s ease;
+}
+
+.sunimg {
+    position: fixed;
+    top: clamp(25px,3vw,45px);
+    right: clamp(12px,2vw,30px);
+    width: auto;
+    height: clamp(90px,13vw,180px);
+    z-index: 4;
+    animation: sunset 3s ease-in-out forwards;
+    animation-play-state: paused;
+    transition: filter 1s ease;
+}
+
+@keyframes sunset {
+    from {
+        transform: translate(0,0);
+    }
+
+    to {
+        transform: translate(300px,200px);
+    }
+}
+
+.moonimg {
+    position: fixed;
+    left: clamp(12px,2vw,25px);
+    bottom: clamp(18vh,23vh,250px);
+    width: auto;
+    height: clamp(90px,13vw,180px);
+    z-index: 1;
+    animation: moonset 3s ease-in-out reverse;
+    animation-play-state: paused;
+    filter: drop-shadow(0 0 45px rgba(255,255,220,.8));
+}
+
+@keyframes moonset {
+    from {
+        transform: translate(0,0);
+    }
+    to {
+        transform: translate(-300px,450px);
+    }
+}
+
+.cld,.nightcld1 {
+    position: fixed;
+    top: clamp(120px,12vw,170px);
+    right: clamp(12vw,25vw,340px);
+    width: auto;
+    height: clamp(45px,6vw,80px);
+    z-index: 5;
+}
+
+.cld {
+    animation: cloudmove 18s linear infinite alternate;
+}
+
+.nightcld1 {
+    display: none;
+    animation: cloudmove 18s linear infinite alternate,
+               cloudfloat 4s ease-in-out infinite alternate;
+}
+
+.cld2,.nightcld2 {
+    position: fixed;
+    top: clamp(50px,6vw,80px);
+    left: clamp(4vw,8vw,100px);
+    width: auto;
+    height: clamp(75px,11vw,150px);
+    z-index: 5;
+}
+
+.cld2 {
+    animation: cloudmove 18s linear infinite alternate;
+}
+
+.nightcld2 {
+    display: none;
+    animation: cloudmove 18s linear infinite alternate,
+               cloudfloat 4s ease-in-out infinite alternate;
+}
+
+@keyframes cloudmove {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(200px);
+    }
+}
+
+@keyframes cloudfloat {
+    from {
+        margin-top: 0;
+    }
+
+    to {
+        margin-top: 15px;
+    }
+}
+
+.suncloud,.suncloud2 {
+    position: fixed;
+    width: auto;
+    height: clamp(75px,11vw,150px);
+    opacity: 0;
+    display: none;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.suncloud {
+    top: clamp(15px,3vw,30px);
+    right: clamp(45px,8vw,110px);
+}
+
+.suncloud2 {
+    top: clamp(50px,6vw,80px);
+    right: clamp(5px,2vw,20px);
+}
+
+@keyframes rainCloudIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.eyeimg1,.eyeimg2 {
+    position: fixed;
+    top: clamp(-45px,-3vw,-25px);
+    left: 50%;
+    width: auto;
+    height: clamp(210px,32vw,400px);
+    transform: translateX(-50%);
+    transform-origin: center;
+    z-index: 12;
+    animation: blink 4s infinite;
+}
+
+.eyeimg1 {
+    display: block;
+}
+
+.eyeimg2 {
+    display: none;
+}
+
+@keyframes blink {
+    0%,90%,100% {
+        transform: translateX(-50%) scaleY(1);
+    }
+
+    95% {
+        transform: translateX(-50%) scaleY(.05);
+    }
+}
+
+.pupilleft,.pupilright {
+    position: fixed;
+    width: clamp(25px,3.5vw,50px);
+    height: clamp(25px,3.5vw,50px);
+    border-radius: 50%;
+    background: #0a0a0a;
+    z-index: 13;
+    pointer-events: none;
+    transition: transform .001s linear;
+}
+
+.pupilleft {
+    left: calc(50% - clamp(50px,10.5vw,150px));
+    top: clamp(82px,11vw,150px);
+}
+
+.pupilright {
+    left: calc(50% + clamp(20px,3vw,40px));
+    top: clamp(82px,11vw,150px);
+}
+
+.togglebtn {
+    position: fixed;
+    right: clamp(15px,3vw,40px);
+    bottom: clamp(15px,3vw,35px);
+    width: clamp(54px,5vw,70px);
+    height: clamp(54px,5vw,70px);
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    z-index: 30;
+    transition: .3s ease;
+}
+
+.weather-menu {
+    position: fixed;
+    top: max(10px,env(safe-area-inset-top));
+    left: max(10px,env(safe-area-inset-left));
+    z-index: 30;
+}
+
+.mode-btn,.mode-options button {
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #111;
+}
+
+.mode-btn {
+    padding: 10px 18px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.mode-options {
+    display: none;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 8px;
+}
+
+.mode-options button {
+    padding: 9px 14px;
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.rain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 25;
+}
+
+.raindrop {
+    position: absolute;
+    width: 2px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.55);
+    filter: blur(.4px);
+    animation: rainFall linear infinite;
+}
+
+@keyframes rainFall {
+    from {
+        transform: translateY(-30px);
+    }
+
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+.snowfall-container {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 24;
+}
+
+.snowflake {
+    position: absolute;
+    top: -20px;
+    color: #fff;
+    font-size: 14px;
+    animation: snowFall linear infinite;
+}
+
+@keyframes snowFall {
+    from {
+        transform: translateY(-30px);
+    }
+
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+.snow,.snow2 {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 31vh;
+    display: none;
+    background: #fff;
+    opacity: 1;
+    pointer-events: none;
+    z-index: 9;
+}
+
+.snow {
+    clip-path: polygon(55% 0,48.5% 16%,55% 35%,60% 20%,55% 0);
+}
+
+.snow2 {
+    clip-path: polygon(85% 0,82.5% 10%,85% 18%,88% 9%,84.5% -1%);
+    z-index: 10;
+}
+
+.stars {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.star {
+    position: absolute;
+    width: 1.5px;
+    height: 1.5px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: .8;
+    box-shadow: 0 0 4px 1px rgba(180,220,255,.9),
+                0 0 9px 2px rgba(130,190,255,.35);
+    animation: starGlow ease-in-out infinite alternate;
+}
+
+.star.bright {
+    width: 2px;
+    height: 2px;
+    box-shadow: 0 0 5px 2px #fff,
+                0 0 12px 3px rgba(120,190,255,.75),
+                0 0 20px 5px rgba(80,150,255,.25);
+}
+
+@keyframes starGlow {
+    0% {
+        opacity: .35;
+        transform: scale(.75);
+    }
+
+    45% {
+        opacity: .8;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+.meteor {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    z-index: 2;
+    box-shadow: 0 0 5px 2px #fff,
+                0 0 12px 4px #b9e4ff,
+                0 0 25px 8px rgba(80,170,255,.75);
+    animation: meteorFly 1.45s cubic-bezier(.15,.5,.3,1) forwards;
+}
+
+.meteor::before {
+    content: "";
+    position: absolute;
+    right: 1px;
+    top: 50%;
+    width: clamp(100px,10vw,150px);
+    height: 3px;
+    transform: translateY(-50%);
+    transform-origin: right center;
+    border-radius: 100%;
+    background: linear-gradient(90deg,rgba(255,255,255,.95),
+    rgba(150,215,255,.7),rgba(80,160,255,.25),transparent);
+    filter: blur(.8px);
+}
+
+.meteor::after {
+    content: "";
+    position: absolute;
+    right: -3px;
+    top: 50%;
+    width: 45px;
+    height: 12px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: rgba(180,230,255,.4);
+    filter: blur(6px);
+}
+
+@keyframes meteorFly {
+    0% {
+        opacity: 0;
+        transform: translate(0,0) rotate(-35deg) scale(.7);
+    }
+
+    8% {
+        opacity: 1;
+    }
+
+    45% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-420px,420px) rotate(-35deg) scale(1);
+    }
+}
+
+body.light.rainy-weather {
+    background: #87939b;
+}
+
+body.light.rainy-weather .cld,body.light.rainy-weather .cld2 {
+    filter: grayscale(.7) brightness(.75);
+}
+
+body.light.rainy-weather .sunimg {
+    filter: grayscale(.5) brightness(.65);
+}
+
+body.dark.rainy-weather {
+    background: #050708;
+}
+
+body.dark.rainy-weather .m1 {
+    background: #10191e;
+}
+
+body.dark.rainy-weather .m2 {
+    background: #162b28;
+}
+
+body.dark.rainy-weather .m3 {
+    background: #1c3b34;
+}
+
+body.dark.rainy-weather .ground {
+    background: #171d1c;
+}
+
+body.dark.rainy-weather .sunimg {
+    filter: grayscale(.8) brightness(.25);
+}
+
+body.light.snow-weather {
+    background: #b8c5cc;
+}
+
+body.light.snow-weather .cld,body.light.snow-weather .cld2 {
+    filter: grayscale(.5) brightness(.9);
+}
+
+body.dark.snow-weather {
+    background: #050608;
+}
+
+body.dark.snow-weather .m1 {
+    background: #101820;
+}
+
+body.dark.snow-weather .m2 {
+    background: #182b29;
+}
+
+body.dark.snow-weather .m3 {
+    background: #1d3b35;
+}
+
+body.dark.snow-weather .ground {
+    background: #171d1c;
+}
+
+body.dark.snow-weather .sunimg {
+    filter: brightness(.3) grayscale(.7);
+}
+
+body.dark {
+    background: #111;
+}
+
+body.dark .m1 {
+    background: #263b46;
+}
+
+body.dark .m2 {
+    background: #28594f;
+}
+
+body.dark .m3 {
+    background: #367565;
+}
+
+body.dark .ground {
+    background: #27302f;
+}
+
+body.dark .snow,body.dark .snow2 {
+    background: #dfe7eb;
+}
+
+body.dark .stars {
+    display: block;
+}
+
+@media (max-width: 700px) {
+    .m1,.m2,.m3,.snow,.snow2 {
+        height: 27vh;
+    }
+
+    .ground {
+        width: 145vw;
+        height: 15vh;
+        bottom: -7.5vh;
+    }
+
+    .togglebtn {
+        right: max(12px,env(safe-area-inset-right));
+        bottom: max(12px,env(safe-area-inset-bottom));
+    }
+
+    .mode-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .mode-options {
+        gap: 6px;
+    }
+
+    .mode-options button {
+        padding: 8px 11px;
+        font-size: 11px;
+    }
+
+    .eyeimg1,.eyeimg2 {
+        height: clamp(190px,58vw,260px);
+    }
+
+    .pupilleft,.pupilright {
+        width: clamp(25px,8vw,32px);
+        height: clamp(25px,8vw,32px);
+        top: clamp(82px,22vw,100px);
+    }
+
+    .pupilleft {
+        left: calc(50% - clamp(45px,14vw,55px));
+    }
+
+    .pupilright {
+        left: calc(50% + clamp(19px,6vw,23px));
+    }
+
+    .sunimg {
+        top: max(42px,env(safe-area-inset-top));
+        height: clamp(72px,23vw,110px);
+    }
+
+    .moonimg {
+        bottom: 20vh;
+        height: clamp(72px,23vw,110px);
+    }
+
+    .cld,.nightcld1 {
+        top: 140px;
+        right: 12vw;
+        height: clamp(38px,13vw,55px);
+    }
+
+    .cld2,.nightcld2 {
+        top: 62px;
+        left: 5vw;
+        height: clamp(68px,22vw,95px);
+    }
+
+    .suncloud,.suncloud2 {
+        height: clamp(68px,22vw,95px);
+    }
+
+    .suncloud {
+        top: 20px;
+        right: 55px;
+    }
+
+    .suncloud2 {
+        top: 58px;
+        right: 4px;
+    }
+
+    .meteor {
+        width: 3px;
+        height: 3px;
+    }
+
+    .meteor::before {
+        width: 105px;
+        height: 2px;
+    }
+}
+
+@media (max-width: 420px) {
+    .weather-menu {
+        top: max(8px,env(safe-area-inset-top));
+        left: max(8px,env(safe-area-inset-left));
+    }
+
+    .mode-btn {
+        padding: 7px 10px;
+        font-size: 11px;
+    }
+
+    .mode-options button {
+        padding: 7px 9px;
+        font-size: 10px;
+    }
+
+    .togglebtn {
+        width: 52px;
+        height: 52px;
+    }
+
+    .eyeimg1,.eyeimg2 {
+        height: clamp(180px,60vw,225px);
+    }
+
+    .pupilleft,.pupilright {
+        width: 25px;
+        height: 25px;
+        top: 82px;
+    }
+
+    .pupilleft {
+        left: calc(50% - 44px);
+    }
+
+    .pupilright {
+        left: calc(50% + 19px);
+    }
+
+    .sunimg {
+        height: 72px;
+        top: 46px;
+    }
+
+    .moonimg {
+        height: 72px;
+        bottom: 19vh;
+    }
+
+    .cld,.nightcld1 {
+        height: 38px;
+        top: 136px;
+    }
+
+    .cld2,.nightcld2 {
+        height: 68px;
+        top: 60px;
+    }
+
+    .m1,.m2,.m3,.snow,.snow2 {
+        height: 25vh;
+    }
+
+    .ground {
+        height: 14vh;
+        bottom: -7vh;
+    }
+}
+
+@media (max-width: 360px) {
+    .togglebtn {
+        width: 48px;
+        height: 48px;
+        font-size: 10px;
+    }
+
+    .eyeimg1,.eyeimg2 {
+        height: 190px;
+    }
+
+    .pupilleft,.pupilright {
+        width: 23px;
+        height: 23px;
+        top: 78px;
+    }
+
+    .pupilleft {
+        left: calc(50% - 41px);
+    }
+
+    .pupilright {
+        left: calc(50% + 18px);
+    }
+
+    .sunimg {
+        height: 66px;
+        top: 48px;
+    }
+
+    .moonimg {
+        height: 66px;
+    }
+
+    .cld,.nightcld1 {
+        height: 35px;
+    }
+
+    .cld2,.nightcld2 {
+        height: 62px;
+    }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    .m1,.m2,.m3,.snow,.snow2 {
+        height: 34vh;
+    }
+
+    .ground {
+        height: 20vh;
+        bottom: -10vh;
+    }
+
+    .eyeimg1,.eyeimg2 {
+        height: min(45vh,250px);
+        top: -30px;
+    }
+
+    .pupilleft,.pupilright {
+        width: 27px;
+        height: 27px;
+        top: 17vh;
+    }
+
+    .pupilleft {
+        left: calc(50% - 52px);
+    }
+
+    .pupilright {
+        left: calc(50% + 22px);
+    }
+
+    .sunimg {
+        height: min(22vh,115px);
+        top: 4vh;
+        right: 15px;
+    }
+
+    .moonimg {
+        height: min(22vh,115px);
+        bottom: 22vh;
+        left: 10px;
+    }
+
+    .cld,.nightcld1 {
+        height: 10vh;
+        top: 27vh;
+        right: 15vw;
+    }
+
+    .cld2,.nightcld2 {
+        height: 17vh;
+        top: 9vh;
+        left: 8vw;
+    }
+
+    .weather-menu {
+        top: 8px;
+        left: 8px;
+    }
+
+    .togglebtn {
+        width: 54px;
+        height: 54px;
+        right: 12px;
+        bottom: 12px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .m1,.m2,.m3,.snow,.snow2 {
+        height: 320px;
+    }
+
+    .ground {
+        height: 190px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,*::before,*::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+</style>
+</head>
+
+<body class="light">
+<div class="stars"></div>
+<div class="m1"></div>
+<div class="m2"></div>
+<div class="snow"></div>
+<div class="snow2"></div>
+<div class="m3"></div>
+<div class="ground"></div>
+
+<div class="sun">
+    <img class="sunimg"
+        src="https://www.onlygfx.com/wp-content/uploads/2018/09/4-clipart-sun-1.png"
+        alt="">
+</div>
+<div class="moon">
+    <img class="moonimg"
+        src="https://www.freeiconspng.com/thumbs/moon-png/moon-png-no-background-15.png"
+        alt="">
+</div>
+
+<div class="cloud">
+    <img class="cld"
+        src="https://static.vecteezy.com/system/resources/thumbnails/046/859/958/small/blue-cloud-3d-isolated-on-transparent-background-png.png"
+        alt="">
+
+    <img class="cld2"
+        src="https://static.vecteezy.com/system/resources/thumbnails/046/859/958/small/blue-cloud-3d-isolated-on-transparent-background-png.png"
+        alt="">
+
+    <img class="nightcld1" src="nightcloud.png" alt="">
+    <img class="nightcld2" src="nightcloud.png" alt="">
+    <img class="suncloud" src="nightcloud.png" alt="">
+    <img class="suncloud2" src="nightcloud.png" alt="">
+</div>
+<div class="rain"></div>
+<div class="snowfall-container"></div>
+
+<button class="togglebtn" type="button">Toggle</button>
+
+<div class="weather-menu">
+    <button class="mode-btn" type="button">MODE</button>
+
+    <div class="mode-options">
+        <button class="cleanBtn" type="button">☀️ Clean</button>
+        <button class="rainyBtn" type="button">🌧️ Rainy</button>
+        <button class="snowBtn" type="button">❄️ Snowfall</button>
+    </div>
+</div>
+<img class="eyeimg1" src="eyeee.png" alt="">
+<img class="eyeimg2" src="eyeee2.png" alt="">
+<div class="pupilleft"></div>
+<div class="pupilright"></div>
+
+<script>
+const body=document.body;
+const toggleBtn=document.querySelector(".togglebtn");
+const modeBtn=document.querySelector(".mode-btn");
+const modeOptions=document.querySelector(".mode-options");
+const cleanBtn=document.querySelector(".cleanBtn");
+const rainyBtn=document.querySelector(".rainyBtn");
+const snowBtn=document.querySelector(".snowBtn");
+const sun=document.querySelector(".sunimg");
+const moon=document.querySelector(".moonimg");
+const eye1=document.querySelector(".eyeimg1");
+const eye2=document.querySelector(".eyeimg2");
+const pupilLeft=document.querySelector(".pupilleft");
+const pupilRight=document.querySelector(".pupilright");
+const dayCloud1=document.querySelector(".cld");
+const dayCloud2=document.querySelector(".cld2");
+const nightCloud1=document.querySelector(".nightcld1");
+const nightCloud2=document.querySelector(".nightcld2");
+const mountain1=document.querySelector(".m1");
+const mountain2=document.querySelector(".m2");
+const mountain3=document.querySelector(".m3");
+const ground=document.querySelector(".ground");
+const snowMountain1=document.querySelector(".snow");
+const snowMountain2=document.querySelector(".snow2");
+const rain=document.querySelector(".rain");
+const snowContainer=document.querySelector(".snowfall-container");
+const rainCloud1=document.querySelector(".suncloud");
+const rainCloud2=document.querySelector(".suncloud2");
+const stars=document.querySelector(".stars");
+
+
+
+
+for (let i = 0; i < 48; i++) {
+    const star = document.createElement("span");
+
+    star.className = Math.random() < .12
+        ? "star bright"
+        : "star";
+
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.top = `${Math.random() * 72}%`;
+    star.style.animationDuration = `${1.8 + Math.random() * 3.5}s`;
+    star.style.animationDelay = `${Math.random() * 4}s`;
+
+    stars.appendChild(star);
+}
+
+function createMeteor() {
+    if (!body.classList.contains("dark")) {
+        return;
+    }
+
+    const meteor = document.createElement("span");
+
+    meteor.className = "meteor";
+    meteor.style.left = `${75 + Math.random() * 30}%`;
+    meteor.style.top = `${Math.random() * 40 - 5}%`;
+
+    stars.appendChild(meteor);
+
+    setTimeout(() => {
+        meteor.remove();
+    }, 1500);
+}
+
+function meteorLoop() {
+    if (body.classList.contains("dark")) {
+        createMeteor();
+
+        if (Math.random() > .75) {
+            setTimeout(createMeteor, 900);
+        }
+    }
+
+    setTimeout(meteorLoop, 6500 + Math.random() * 6500);
+}
+
+setTimeout(meteorLoop, 3500);
+
+modeBtn.addEventListener("click", () => {
+    const isOpen = modeOptions.style.display === "flex";
+    modeOptions.style.display = isOpen ? "none" : "flex";
+});
+
+document.addEventListener("click", event => {
+    if (!event.target.closest(".weather-menu")) {
+        modeOptions.style.display = "none";
+    }
+});
+
+function resetWeather() {
+    body.classList.remove("rainy-weather","snow-weather");
+    rain.style.display = "none";
+    rain.innerHTML = "";
+    snowContainer.style.display = "none";
+    snowContainer.innerHTML = "";
+    rainCloud1.style.display = "none";
+    rainCloud2.style.display = "none";
+    rainCloud1.style.animation = "none";
+    rainCloud2.style.animation = "none";
+    rainCloud1.style.opacity = "0";
+    rainCloud2.style.opacity = "0";
+    snowMountain1.style.display = "none";
+    snowMountain2.style.display = "none";
+}
+cleanBtn.addEventListener("click", () => {
+    resetWeather();
+    modeOptions.style.display = "none";
+});
+
+rainyBtn.addEventListener("click", () => {
+    resetWeather();
+    body.classList.add("rainy-weather");
+    modeOptions.style.display = "none";
+    rainCloud1.style.display = "block";
+    rainCloud2.style.display = "block";
+    rainCloud1.style.animation = "none";
+    rainCloud2.style.animation = "none";
+    void rainCloud1.offsetWidth;
+    rainCloud1.style.animation = "rainCloudIn 1.5s ease forwards";
+    rainCloud2.style.animation = "rainCloudIn 1.5s ease .3s forwards";
+    for (let i = 0; i < 120; i++) {
+        const drop = document.createElement("span");
+        drop.className = "raindrop";
+        drop.style.left = `${Math.random() * 100}%`;
+        drop.style.animationDuration = `${.5 + Math.random() * .6}s`;
+        drop.style.animationDelay = `${Math.random()}s`;
+        rain.appendChild(drop);
+    }
+
+    setTimeout(() => {
+        rain.style.display = "block";
+    }, 1000);
+});
+
+snowBtn.addEventListener("click", () => {
+    resetWeather();
+
+    body.classList.add("snow-weather");
+    modeOptions.style.display = "none";
+    snowMountain1.style.display = "block";
+    snowMountain2.style.display = "block";
+
+    for (let i = 0; i < 100; i++) {
+        const snowflake = document.createElement("span");
+
+        snowflake.className = "snowflake";
+        snowflake.textContent = "❄";
+        snowflake.style.left = `${Math.random() * 100}%`;
+        snowflake.style.fontSize = `${8 + Math.random() * 12}px`;
+        snowflake.style.animationDuration = `${3 + Math.random() * 5}s`;
+        snowflake.style.animationDelay = `${Math.random() * 5}s`;
+        snowContainer.appendChild(snowflake);
+    }
+
+    snowContainer.style.display = "block";
+});
+
+function setDay() {
+    body.classList.remove("dark");
+    body.classList.add("light");
+    sun.style.animation = "none";
+    moon.style.animation = "none";
+    void sun.offsetWidth;
+    sun.style.animation = "sunset 1.5s ease-in-out reverse forwards";
+    moon.style.animation = "moonset 1.5s ease-in-out forwards";
+    eye1.style.display = "block";
+    eye2.style.display = "none";
+    pupilLeft.style.background = "#000";
+    pupilRight.style.background = "#000";
+    dayCloud1.style.display = "block";
+    dayCloud2.style.display = "block";
+    nightCloud1.style.display = "none";
+    nightCloud2.style.display = "none";
+    mountain1.style.background = "green";
+    mountain2.style.background = "rgb(33,221,74)";
+    mountain3.style.background = "rgb(16,107,35)";
+    ground.style.background = "rgb(204,188,107)";
+    snowMountain1.style.display = "none";
+    snowMountain2.style.display = "none";
+    toggleBtn.style.color = "#000";
+}
+
+function setNight() {
+    body.classList.remove("light");
+    body.classList.add("dark");
+    sun.style.animation = "none";
+    moon.style.animation = "none";
+    void sun.offsetWidth;
+    sun.style.animation = "sunset 2s ease-in-out forwards";
+    moon.style.animation = "moonset 2s ease-in-out reverse";
+    moon.style.animationPlayState = "running";
+    eye1.style.display = "none";
+    eye2.style.display = "block";
+    pupilLeft.style.background = "#176B8C";
+    pupilRight.style.background = "#176B8C";
+    dayCloud1.style.display = "none";
+    dayCloud2.style.display = "none";
+    nightCloud1.style.display = "block";
+    nightCloud2.style.display = "block";
+    mountain1.style.background = "#263B46";
+    mountain2.style.background = "#28594F";
+    mountain3.style.background = "#367565";
+    ground.style.background = "#27302f";
+    snowMountain1.style.display = "block";
+    snowMountain2.style.display = "block";
+    toggleBtn.style.color = "#fff";
+}
+
+toggleBtn.addEventListener("click", () => {
+    if (body.classList.contains("light")) {
+        setNight();
+    } else {
+        setDay();
+    }
+});
+
+function movePupils(clientX, clientY) {
+    const isMobile = window.innerWidth <= 700;
+    const amount = isMobile ? 42 : 65;
+    const x = (clientX / window.innerWidth - .5) * amount;
+    const y = (clientY / window.innerHeight - .5) * amount;
+    pupilLeft.style.transform = `translate(${x}px, ${y}px)`;
+    pupilRight.style.transform = `translate(${x}px, ${y}px)`;
+}
+document.addEventListener("mousemove", event => {
+    movePupils(event.clientX,event.clientY);
+});
+document.addEventListener("touchmove", event => {
+    const touch = event.touches[0];
+    if (!touch) {
+        return;
+    }
+    movePupils(touch.clientX,touch.clientY);
+}, {
+    passive: true
+});
+window.addEventListener("resize", () => {
+    pupilLeft.style.transform = "translate(0, 0)";
+    pupilRight.style.transform = "translate(0, 0)";
+});
+</script>
+</body>
+</html>
